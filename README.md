@@ -1,11 +1,13 @@
 # DL Cover Mangadex
----
 
 ## Première étape
----
-Lancez les commandes
+Lancez la commande une fois
 ```
 npm i
+```
+## Deuxième étape
+Lancement du programme
+```
 node scrap.js
 ```
 
