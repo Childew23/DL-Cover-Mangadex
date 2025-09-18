@@ -87,7 +87,7 @@ async function main(title) {
         const { id: mangaId, mangaTitle } = mangaInfo;
 
         const cleanMangaTitle = mangaTitle
-                                .replace(/[\\\/:*?"<>|]/g, '')
+                                .replace(/[\\/:*?"<>|]/g, '')
                                 .replace(/[. ]+$/, '');
 
         const coversRoot = path.join(__dirname, 'covers');
