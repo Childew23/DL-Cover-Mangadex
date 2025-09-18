@@ -115,7 +115,7 @@ async function main(title) {
                 continue;
             }
 
-            await downloadCover(mangaId, fileName, folder, saveName);
+            await downloadCover(mangaId, cover.fileName, folder, saveName);
         }
 
         console.log(`Tous les téléchargements sont terminés dans covers/${cleanMangaTitle} !`)
