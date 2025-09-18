@@ -29,8 +29,8 @@ async function getMangaIdByTitle(title) {
 
         const manga = res.data.data[0];
 
-        const realTitle = manga.attributes.title.en || Object.values(manga.attributes.title)[0] || Object.values(manga.attributes.altTitles)[0]
-        return { id: manga.id, realTitle };
+        const mangaTitle = manga.attributes.title.en || Object.values(manga.attributes.title)[0] || Object.values(manga.attributes.altTitles)[0]
+        return { id: manga.id, mangaTitle };
     } catch (error) {
         console.error("Erreur lors de la requête : ", error.message);
         return null;
@@ -81,17 +81,13 @@ async function main(title) {
             return;
         }
 
-        const { id: mangaId, realTitle } = mangaInfo;
-
-        const safeTitle = realTitle
-            .replace(/[^a-z0-9 \-_.!]/gi, "_")
-            .replace(/[_\s.]+$/, "");
+        const { id: mangaId, mangaTitle } = mangaInfo;
 
         const coversRoot = path.join(__dirname, 'covers');
         if (!fs.existsSync(coversRoot)) {
             fs.mkdirSync(coversRoot);
         }
-        const folder = path.join(coversRoot, safeTitle);
+        const folder = path.join(coversRoot, mangaTitle);
         if (!fs.existsSync(folder)) {
             fs.mkdirSync(folder);
             console.log(`📂 Dossier créé : ${folder}`)
@@ -115,7 +111,7 @@ async function main(title) {
             await downloadCover(mangaId, fileName, folder, saveName);
         }
 
-        console.log(`Tous les téléchargements sont terminés dans covers/${safeTitle} !`)
+        console.log(`Tous les téléchargements sont terminés dans covers/${mangaTitle} !`)
     } catch (error) {
         console.error("Erreur : ", error.message);
     }
