@@ -84,7 +84,7 @@ async function main(title) {
         const { id: mangaId, realTitle } = mangaInfo;
 
         const safeTitle = realTitle
-            .replace(/[^a-z0-9 \-_.]/gi, "_")
+            .replace(/[^a-z0-9 \-_.!]/gi, "_")
             .replace(/[_\s.]+$/, "");
 
         const coversRoot = path.join(__dirname, 'covers');
