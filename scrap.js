@@ -83,11 +83,15 @@ async function main(title) {
 
         const { id: mangaId, mangaTitle } = mangaInfo;
 
+        const cleanMangaTitle = mangaTitle
+                                .replace(/[\\\/:*?"<>|]/g, '')
+                                .replace(/[. ]+$/, '');
+
         const coversRoot = path.join(__dirname, 'covers');
         if (!fs.existsSync(coversRoot)) {
             fs.mkdirSync(coversRoot);
         }
-        const folder = path.join(coversRoot, mangaTitle);
+        const folder = path.join(coversRoot, cleanMangaTitle);
         if (!fs.existsSync(folder)) {
             fs.mkdirSync(folder);
             console.log(`📂 Dossier créé : ${folder}`)
@@ -111,7 +115,7 @@ async function main(title) {
             await downloadCover(mangaId, fileName, folder, saveName);
         }
 
-        console.log(`Tous les téléchargements sont terminés dans covers/${mangaTitle} !`)
+        console.log(`Tous les téléchargements sont terminés dans covers/${cleanMangaTitle} !`)
     } catch (error) {
         console.error("Erreur : ", error.message);
     }
