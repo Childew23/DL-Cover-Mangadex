@@ -108,7 +108,7 @@ async function main(title) {
         }
 
         for (const cover of covers) {
-            const saveName = `Volume ${cover.volume}`;
+            const saveName = `Volume ${cover.volume}${path.extname(cover.fileName)}`;
             const filePath = path.join(folder, saveName);
 
             if (fs.existsSync(filePath)) {
