@@ -51,7 +51,10 @@ async function getCovers(mangaId) {
         });
 
         const covers = res.data.data;
-        return covers.map(cover => cover.attributes.fileName);
+        return covers.map(cover => ({
+            fileName : cover.attributes.fileName,
+            volume: cover.attributes.volume
+        }));
 
     } catch (error) {
         console.error("Erreur : ", error.message);
@@ -104,8 +107,8 @@ async function main(title) {
             return;
         }
 
-        for (const [i, fileName] of covers.entries()) {
-            const saveName = `Volume ${i + 1}${path.extname(fileName)}`;
+        for (const cover of covers) {
+            const saveName = `Volume ${cover.volume}`;
             const filePath = path.join(folder, saveName);
 
             if (fs.existsSync(filePath)) {
