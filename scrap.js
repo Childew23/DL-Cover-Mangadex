@@ -38,27 +38,43 @@ async function getMangaIdByTitle(title) {
 };
 
 async function getCovers(mangaId) {
-    try {
-        const res = await axios({
-            method: 'GET',
-            url: `${baseUrl}/cover`,
-            params: {
-                'manga[]': mangaId,
-                'order[volume]': 'asc',
-                'locales[]': 'ja',
-                limit: 100
+    const allCovers = [];
+    let offset = 0;
+    const limit = 100;
+    let hasMore = true;
+
+    while (hasMore) {
+        try {
+            const res = await axios({
+                method: 'GET',
+                url: `${baseUrl}/cover`,
+                params: {
+                    'manga[]': mangaId,
+                    'order[volume]': 'asc',
+                    'locales[]': 'ja',
+                    limit: 100,
+                    offset
+                }
+            });
+
+            const covers = res.data.data;
+            allCovers.push(...covers.map(cover => ({
+                fileName: cover.attributes.fileName,
+                volume: cover.attributes.volume
+            })));
+
+            if (covers.length < limit) {
+                hasMore = false;
+            } else {
+                offset += limit;
             }
-        });
-
-        const covers = res.data.data;
-        return covers.map(cover => ({
-            fileName : cover.attributes.fileName,
-            volume: cover.attributes.volume
-        }));
-
-    } catch (error) {
-        console.error("Erreur : ", error.message);
+        } catch (error) {
+            console.error("Erreur : ", error.message);
+            hasMore = false;
+        }
     }
+
+    return allCovers;
 };
 
 async function downloadCover(mangaId, fileName, folder, saveName) {
@@ -87,8 +103,8 @@ async function main(title) {
         const { id: mangaId, mangaTitle } = mangaInfo;
 
         const cleanMangaTitle = mangaTitle
-                                .replace(/[\\/:*?"<>|]/g, '')
-                                .replace(/[. ]+$/, '');
+            .replace(/[\\/:*?"<>|]/g, '')
+            .replace(/[. ]+$/, '');
 
         const coversRoot = path.join(__dirname, 'covers');
         if (!fs.existsSync(coversRoot)) {
