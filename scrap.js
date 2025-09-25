@@ -102,6 +102,27 @@ async function downloadCover(mangaId, fileName, folder, saveName, retry = 2) {
 
 };
 
+async function downloadInBatches(covers, mangaId, folder, batchSize = 5) {
+    for (let i = 0; i < covers.length; i+= batchSize) {
+        const batch = covers.slice(i, i + batchSize);
+
+        await Promise.all(
+            batch.map(cover => {
+                const volumeLabel = cover.volume ? `Volume ${cover.volume}` : "Oneshot";
+                const saveName = `${volumeLabel}${path.extname(cover.fileName)}`;
+                const filePath = path.join(folder, saveName);
+
+                if (fs.existsSync(filePath)) {
+                    return Promise.resolve();
+                }
+
+                return downloadCover(mangaId, cover.fileName, folder, saveName);
+            })
+        )
+        
+    }
+}
+
 async function main(title) {
     try {
         const mangaInfo = await getMangaIdByTitle(title);
@@ -133,17 +154,8 @@ async function main(title) {
             return;
         }
 
-        for (const cover of covers) {
-            const volumeLabel = cover.volume ? `Volume ${cover.volume}` : "OneShot";
-            const saveName = `Volume ${volumeLabel}${path.extname(cover.fileName)}`;
-            const filePath = path.join(folder, saveName);
-
-            if (fs.existsSync(filePath)) {
-                continue;
-            }
-
-            await downloadCover(mangaId, cover.fileName, folder, saveName);
-        }
+        console.log("Téléchargement en cours...");
+        await downloadInBatches(covers, mangaId, folder, 5);
 
         console.log(`Tous les téléchargements sont terminés dans covers/${cleanMangaTitle} !`)
     } catch (error) {
