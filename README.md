@@ -66,7 +66,7 @@ Téléchargement en cours...
 ✅ Volume 4.jpg
 ✅ Volume 5.jpg
 ...
-Tous les téléchargements sont terminés dans covers/Berserk !
+Tous les téléchargements sont terminés dans covers/Kaguya-sama wa Kokurasetai Tensai-tachi no Renai Zunousen !
 ```
 
 Toutes les couvertures téléchargées seront sauvegardées dans le dossier `covers/[Titre du Manga]` à la racine du projet.
