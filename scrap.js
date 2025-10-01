@@ -1,6 +1,6 @@
 import axios from "axios";
 import fs from "fs";
-import path from "path";
+import path  from "path";
 import readline from "readline";
 import { fileURLToPath } from "url";
 
@@ -19,7 +19,8 @@ async function getMangaIdByTitle(title) {
             method: 'GET',
             url: `${baseUrl}/manga`,
             params: {
-                title: title
+                title: title,
+                limit: 5
             }
         });
 
@@ -27,10 +28,35 @@ async function getMangaIdByTitle(title) {
             throw new Error("Manga introuvable.");
         }
 
-        const manga = res.data.data[0];
+        const mangas = res.data.data.map(manga => {
+            const mangaTitle =
+                manga.attributes.title.en ||
+                Object.values(manga.attributes.title)[0] ||
+                (manga.attributes.altTitles.length > 0
+                    ? Object.values(manga.attributes.altTitles)[0]
+                    : "NoTitle");
 
-        const mangaTitle = manga.attributes.title.en || Object.values(manga.attributes.title)[0] || (manga.attributes.altTitles.length > 0 ? Object.values(manga.attributes.altTitles)[0] : "NoTitle");
-        return { id: manga.id, mangaTitle };
+            return { id: manga.id, mangaTitle };
+        });
+
+        console.log("\nRésultats trouvés :");
+        mangas.forEach((m, index) => {
+            console.log(`${index + 1}. ${m.mangaTitle}`)
+        });
+
+        return new Promise(resolve => {
+            rl.question("\nChoisissez un numéro : ", answer => {
+                const choice = parseInt(answer, 10);
+
+                if (isNaN(choice) || choice < 1 || choice > mangas.length) {
+                    console.log("❌ Choix invalide, utilisation du premier résultat.");
+                    resolve(mangas[0]);
+                } else {
+                    resolve(mangas[choice - 1]);
+                }
+            });
+        });
+
     } catch (error) {
         console.error("Erreur lors de la requête : ", error.message);
         return null;
@@ -103,7 +129,7 @@ async function downloadCover(mangaId, fileName, folder, saveName, retry = 2) {
 };
 
 async function downloadInBatches(covers, mangaId, folder, batchSize = 5) {
-    for (let i = 0; i < covers.length; i+= batchSize) {
+    for (let i = 0; i < covers.length; i += batchSize) {
         const batch = covers.slice(i, i + batchSize);
 
         await Promise.all(
@@ -119,7 +145,7 @@ async function downloadInBatches(covers, mangaId, folder, batchSize = 5) {
                 return downloadCover(mangaId, cover.fileName, folder, saveName);
             })
         )
-        
+
     }
 }
 
@@ -164,6 +190,5 @@ async function main(title) {
 }
 
 rl.question("Entrez le titre du manga : ", (title) => {
-    rl.close();
-    main(title);
+    main(title).then(() => rl.close());
 })
