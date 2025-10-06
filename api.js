@@ -1,12 +1,8 @@
-import axios from "axios";
-
-const baseUrl = 'https://api.mangadex.org';
+import api from "./axiosInstance.js";
 
 export async function getMangaIdByTitle(title) {
     try {
-        const res = await axios({
-            method: 'GET',
-            url: `${baseUrl}/manga`,
+        const res = await api.get("/manga", {
             params: {
                 title: title,
                 limit: 5
@@ -44,9 +40,7 @@ export async function getCovers(mangaId) {
 
     while (hasMore) {
         try {
-            const res = await axios({
-                method: 'GET',
-                url: `${baseUrl}/cover`,
+            const res = await api.get("/cover", {
                 params: {
                     'manga[]': mangaId,
                     'order[volume]': 'asc',
@@ -68,7 +62,7 @@ export async function getCovers(mangaId) {
                 offset += limit;
             }
         } catch (error) {
-            console.error("Erreur : ", error.message);
+            console.error("Erreur lors de la récupération des covers : ", error.message);
             hasMore = false;
         }
     }

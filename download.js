@@ -1,11 +1,12 @@
-import axios from "axios";
 import fs from "fs";
 import path from "path";
+import api from "./axiosInstance.js";
 
-async function downloadCover(mangaId, fileName, folder, saveName, retry = 2) {
+
+async function downloadCover(mangaId, fileName, folder, saveName) {
     try {
         const url = `https://uploads.mangadex.org/covers/${mangaId}/${fileName}`;
-        const res = await axios.get(url, { responseType: "stream" });
+        const res = await api.get(url, { responseType: "stream" });
 
         const filePath = path.join(folder, saveName);
         res.data.pipe(fs.createWriteStream(filePath));
@@ -17,12 +18,7 @@ async function downloadCover(mangaId, fileName, folder, saveName, retry = 2) {
             });
         });
     } catch (error) {
-        if (retry > 0) {
-            console.log(`⚠️ Erreur téléchargement ${saveName}, retry...`);
-            return downloadCover(mangaId, fileName, folder, saveName, retry - 1);
-        } else {
-            console.error(`❌ Échec définitif : ${saveName}`, error);
-        }
+        console.error(`❌ Échec définitif : ${saveName}`, error);
     }
 
 };
