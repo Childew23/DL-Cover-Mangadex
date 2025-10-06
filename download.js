@@ -1,7 +1,14 @@
 import fs from "fs";
 import path from "path";
+import cliProgress from "cli-progress";
 import api from "./axiosInstance.js";
 
+const progressBar = new cliProgress.SingleBar({
+    format: "Téléchargment [{bar}] {percentage}% | {value}/{total} volumes",
+    barCompleteChar: '\u2588',
+    barIncompleteChar: '\u2591',
+    hideCursor: true
+}, cliProgress.Presets.shades_classic);
 
 async function downloadCover(mangaId, fileName, folder, saveName) {
     try {
@@ -13,7 +20,6 @@ async function downloadCover(mangaId, fileName, folder, saveName) {
 
         return new Promise(resolve => {
             res.data.on("end", () => {
-                console.log(`✅ ${saveName}`);
                 resolve();
             });
         });
@@ -24,23 +30,31 @@ async function downloadCover(mangaId, fileName, folder, saveName) {
 };
 
 export async function downloadInBatches(covers, mangaId, folder, batchSize = 5) {
+    progressBar.start(covers.length, 0);
+
+    let downloaded = 0;
     for (let i = 0; i < covers.length; i += batchSize) {
         const batch = covers.slice(i, i + batchSize);
 
         await Promise.all(
-            batch.map(cover => {
+            batch.map(async (cover) => {
                 const volumeLabel = cover.volume ? `Volume ${cover.volume}` : "Oneshot";
                 const saveName = `${volumeLabel}${path.extname(cover.fileName)}`;
                 const filePath = path.join(folder, saveName);
 
                 if (fs.existsSync(filePath)) {
-                    return Promise.resolve();
+                    downloaded++;
+                    progressBar.update(downloaded);
+                    return;
                 }
 
-                return downloadCover(mangaId, cover.fileName, folder, saveName);
+                await downloadCover(mangaId, cover.fileName, folder, saveName);
+                downloaded++;
+                progressBar.update(downloaded);
             })
         )
-
     }
+
+    progressBar.stop();
 }
 

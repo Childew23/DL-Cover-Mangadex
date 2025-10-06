@@ -1,39 +1,37 @@
-import readline from "readline";
+import inquirer from "inquirer";
 import { getMangaIdByTitle } from "./api.js";
 import { run } from "./main.js";
 
+async function startCLI() {
+    const { title } = await inquirer.prompt([
+        {
+            type: "input",
+            name: "title",
+            message: "Entrez le titre du manga :",
+        },
+    ]);
 
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-
-rl.question("Entrez le titre du manga : ", async (title) => {
     const mangas = await getMangaIdByTitle(title);
 
-    if (!mangas) {
+    if (!mangas || mangas.length === 0) {
         console.error("❌ Aucun manga trouvé.");
-        rl.close();
         return;
     }
 
-    console.log("\nRésultats trouvés :");
-    mangas.forEach((m, index) => {
-        console.log(`${index + 1}. ${m.mangaTitle}`)
-    });
-
-    rl.question("\nChoisissez un numéro : ", async (answer) => {
-        const choice = parseInt(answer, 10);
-
-        let selected;
-        if (isNaN(choice) || choice < 1 || choice > mangas.length) {
-            console.log("❌ Choix invalide, utilisation du premier résultat.");
-            selected = mangas[0];
-        } else {
-            selected = mangas[choice - 1];
+    const { selected } = await inquirer.prompt([
+        {
+            type: "list",
+            name: "selected",
+            message: "Sélectionnez le manga :",
+            choices: mangas.map((m) => ({
+                name : `${m.mangaTitle}`,
+                value: m
+            }))
         }
+    ]);
 
-        await run(selected);
-        rl.close();
-    });
-});
+    await run(selected);
+}
+
+startCLI();
+
