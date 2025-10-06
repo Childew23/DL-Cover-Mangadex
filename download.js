@@ -18,7 +18,7 @@ async function downloadCover(mangaId, fileName, folder, saveName) {
             });
         });
     } catch (error) {
-        console.error(`❌ Échec définitif : ${saveName}`, error);
+        console.error(`❌ Échec lors du téléchargement de la cover : ${saveName}`, error);
     }
 
 };
